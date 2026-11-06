@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>twdl 汉化 · 真实场景复现 + 自我诊断</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; background: #f7f9f9; color: #0f1419; }
+  .layout { display: flex; gap: 12px; padding: 10px; align-items: flex-start; }
+  .log-col { flex: 1 1 560px; min-width: 0; }
+  .x-col { flex: 0 1 440px; min-width: 360px; }
+  h3 { margin: 0 0 6px; font-size: 13px; color: #536471; }
+  #log, #diag {
+    white-space: pre-wrap; word-break: break-word; background: #fff;
+    border: 1px solid #cfd9de; border-radius: 10px; padding: 8px; margin-bottom: 10px;
+    font: 12px/1.5 Consolas, "Courier New", monospace; max-height: 520px; overflow: auto;
+  }
+  #diag { background: #0f1419; color: #d2e3f7; border-color: #0f1419; }
+  .pass { color: #0a7d33; }
+  .fail { color: #c1121f; font-weight: 700; }
+  .verdict { margin: 8px 0; font-weight: 700; }
+  /* 模拟 X 的推文卡片 */
+  .x-tweet { background: #fff; border: 1px solid #eff3f4; border-radius: 12px; padding: 10px; margin-bottom: 10px; }
+  .x-user { color: #536471; font-size: 12px; margin-bottom: 4px; }
+  .x-text { font-size: 15px; margin: 4px 0 8px; }
+  .x-actions { display: flex; gap: 26px; color: #536471; font-size: 12px; margin-top: 8px; }
+  /* 关键：复刻 X 媒体容器：overflow:hidden + 绝对定位图片（旧版把块插容器外会被裁掉） */
+  .x-media { overflow: hidden; border-radius: 14px; }
+  .x-photo { position: relative; overflow: hidden; padding-bottom: 56.25%; height: 0; background: #0f1419; }
+  .x-photo img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+  .x-video { position: relative; overflow: hidden; border-radius: 14px; background: #000; aspect-ratio: 16 / 9; }
+  .x-video video { width: 100%; height: 100%; object-fit: cover; }
+  .x-quote { border: 1px solid #cfd9de; border-radius: 12px; padding: 8px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="log-col">
+    <h3>复现说明：用与真实 X 相同的 DOM 结构（cellInnerDiv / tweetPhoto / videoPlayer / overflow:hidden）跑翻译流程，然后调用脚本内置的自检</h3>
+    <div id="log">初始化…</div>
+    <h3>脚本自检报告（__twdl.zh.diagnosticsText()）</h3>
+    <div id="diag">等待诊断…</div>
+  </div>
+
+  <!-- 假 X 页面：结构对齐真实站点 -->
+  <div class="x-col" id="fakeX">
+    <div data-testid="primaryColumn">
+      <!-- 1) 法语图片推文：图片海报，DOM 无正文文本可翻 -->
+      <div data-testid="cellInnerDiv" id="tweetPhotoFr">
+        <article data-testid="tweet" class="x-tweet">
+          <div class="x-user">JORDANIE 🇯🇴 @jordan_poster · 2小时</div>
+          <div class="x-actions"><span>💬 12</span><span>🔁 40</span><span>❤️ 210</span></div>
+          <div class="x-media">
+            <div data-testid="tweetPhoto" class="x-photo">
+              <img src="https://pbs.twimg.com/media/JORDANIE_POSTER?format=jpg&name=small"
+                   alt="SOUS LA COUPOLE DU PARLEMENT, ILS SE RASSEMBLENT POUR PRIER">
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- 2) 视频推文：X 视频封面用 video[poster]/amplify_video_thumb（旧版直接忽略） -->
+      <div data-testid="cellInnerDiv" id="tweetVideoFr">
+        <article data-testid="tweet" class="x-tweet">
+          <div class="x-user">MAD @alphomodric · 4小时</div>
+          <div class="x-actions"><span>💬 4</span><span>🔁 15</span><span>❤️ 18</span></div>
+          <div class="x-video" data-testid="videoPlayer">
+            <video poster="https://pbs.twimg.com/amplify_video_thumb/PARLIAMENT_VIDEO?format=jpg&name=small"
+                   controls preload="none"></video>
+          </div>
+        </article>
+      </div>
+
+      <!-- 3) 俄语推文（西里尔字母）+ 引用推文 -->
+      <div data-testid="cellInnerDiv" id="tweetRu">
+        <article data-testid="tweet" class="x-tweet">
+          <div class="x-user">ivi ✨ @ivipi_ · 6小时</div>
+          <div class="x-text" dir="auto" lang="ru">Так получилось, что я пишу нишевые работы, и лайки для меня ценнее отзывов.</div>
+          <div class="x-quote">
+            <div class="x-user">Книга Иудифи @lemur_chick</div>
+            <div class="x-text" dir="auto" lang="ru">Спасибо за ваш труд, это очень важно для нас.</div>
+          </div>
+          <div class="x-actions"><span>💬 20</span><span>🔁 41</span><span>❤️ 169</span></div>
+        </article>
+      </div>
+
+      <!-- 4) 中文推文：不应翻译 -->
+      <div data-testid="cellInnerDiv" id="tweetZh">
+        <article data-testid="tweet" class="x-tweet">
+          <div class="x-text" dir="auto" lang="zh">这是一条中文推文，不需要翻译。</div>
+        </article>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../twdl-0.2.1-zh.user.js"></script>
+<script src="x-repro.js"></script>
+</body>
+</html>

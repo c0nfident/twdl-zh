@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>zh debug</title>
+<style>
+  body { margin: 0; padding: 10px; font: 12px/1.5 Consolas, monospace; }
+  #log { white-space: pre-wrap; background: #f6f8fa; border: 1px solid #d0d7de; padding: 8px; }
+  [data-testid="cellInnerDiv"] { border: 1px solid #ddd; padding: 6px; margin: 6px 0; max-width: 500px; }
+</style>
+</head>
+<body>
+<div id="log">debug 未执行</div>
+<div id="fakeX">
+  <div data-testid="cellInnerDiv" id="cellM">
+    <div data-testid="tweetPhoto">
+      <img src="https://pbs.twimg.com/media/IMG6?format=png&amp;name=small" alt="IMG6">
+    </div>
+  </div>
+</div>
+<script src="../twdl-0.2.1-zh.user.js"></script>
+<script src="zh-debug.js"></script>
+</body>
+</html>

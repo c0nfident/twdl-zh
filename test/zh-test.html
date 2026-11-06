@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>twdl zh test</title>
+<style>
+  body { margin: 0; padding: 12px; font: 13px/1.45 Consolas, monospace; background: #fff; color: #111; }
+  #log { white-space: pre-wrap; font-size: 12px; background: #f6f8fa; border: 1px solid #d0d7de; padding: 8px; }
+  #fakeX { margin-top: 10px; border: 1px dashed #999; padding: 8px; max-width: 640px; font: 15px/1.5 system-ui, sans-serif; }
+  #fakeX [data-testid="cellInnerDiv"] { border: 1px solid #eee; border-radius: 8px; padding: 8px; margin: 8px 0; }
+  #fakeNav { display: flex; gap: 18px; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+  #fakeNav a { color: #1d9bf0; text-decoration: none; font-weight: 600; }
+  .cap { color: #536471; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="log">zh-test.js 未执行（脚本加载失败？）</div>
+
+<div id="fakeX">
+  <div class="cap">假 X 页面（用于验证汉化模块；真实 X 的 DOM 结构以实际为准）</div>
+  <nav id="fakeNav">
+    <a href="/home"><span>Home</span></a>
+    <a href="/explore"><span>Explore</span></a>
+    <button id="replyBtn" type="button" aria-label="Reply">Reply</button>
+    <span>Following</span>
+  </nav>
+
+  <div data-testid="cellInnerDiv" id="cellA">
+    <div data-testid="User-Name"><a href="/alice">Alice A.</a> <a href="/alice">@alice</a></div>
+    <div dir="auto" lang="en"><span>Hello world, this is a test tweet with @alice and #twdl.</span></div>
+    <div dir="auto" lang="en"><span>This is a quoted tweet paragraph.</span></div>
+  </div>
+
+  <div data-testid="cellInnerDiv" id="cellB">
+    <div dir="auto" lang="zh"><span>这是一条中文推文，不需要翻译。</span></div>
+  </div>
+
+  <div data-testid="cellInnerDiv" id="cellC">
+    <div dir="auto" lang="en"><span>https://example.com/only-url</span></div>
+  </div>
+</div>
+
+<script src="../twdl-0.2.1-zh.user.js"></script>
+<script src="zh-test.js"></script>
+</body>
+</html>

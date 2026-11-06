@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>twdl harness</title>
+<style>
+  body { margin: 0; padding: 12px; font: 13px/1.45 Consolas, monospace; background: #fff; color: #111; }
+  #log { white-space: pre-wrap; font-size: 12px; background: #f6f8fa; border: 1px solid #d0d7de; padding: 8px; }
+  #fakeX { margin-top: 10px; border: 1px dashed #999; padding: 6px; }
+  #fakeX [data-testid="cellInnerDiv"] { border: 1px solid #eee; padding: 6px; margin: 6px 0; }
+  #resultImg { display: none; width: 1170px; }
+  #shot { color: #666; }
+</style>
+<script>
+/* 测试垫片：把 new Image() 指向本地生成的像素，避免测试时联网。
+   （X 页面的真实行为是 pbs.twimg.com 带 name= 参数；这里只验证代码路径） */
+(function () {
+  function pixels(w, h, a, b, label) {
+    var c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    var x = c.getContext('2d');
+    var g = x.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, a);
+    g.addColorStop(1, b);
+    x.fillStyle = g;
+    x.fillRect(0, 0, w, h);
+    x.fillStyle = '#fff';
+    x.font = 'bold 60px sans-serif';
+    x.fillText(label, 30, h / 2 + 20);
+    return c.toDataURL('image/png');
+  }
+  var media = pixels(600, 400, '#e0245e', '#1d9bf0', 'MEDIA 600x400');
+  var avatar = pixels(120, 120, '#ffd166', '#06d6a0', 'AVA');
+  window.__TWDL_TEST_PIXELS = { media: media, avatar: avatar };
+
+  var RealImage = window.Image;
+  var srcDesc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+  function FakeImage() {
+    var img = new RealImage();
+    Object.defineProperty(img, 'src', {
+      configurable: true,
+      get: function () { return srcDesc.get.call(img); },
+      set: function (v) {
+        v = String(v);
+        if (/pbs\.twimg\.com/.test(v)) v = media;
+        else if (/profile_images/.test(v)) v = avatar;
+        srcDesc.set.call(img, v);
+      }
+    });
+    return img;
+  }
+  FakeImage.prototype = RealImage.prototype;
+  window.Image = FakeImage;
+})();
+</script>
+</head>
+<body>
+<div id="log">test.js 未执行（脚本加载失败？）</div>
+
+<div id="fakeX">
+  <!-- cell1: 文字 + 1 张图 + 头像 + 引用块 + 分隔符（x.com） -->
+  <div data-testid="cellInnerDiv" id="cell1">
+    <div data-testid="Tweet-User-Avatar"><div data-avatar="1" style="width:48px;height:48px"></div></div>
+    <div data-testid="User-Name">
+      <a href="/alice">Alice A.</a>::
+      <a href="/alice">@alice</a>
+      <div dir="ltr" aria-hidden="true" style="display:inline">·</div>
+      <time datetime="2026-11-06T10:00:00Z">2小时</time>
+    </div>
+    <div dir="auto" lang="zh"><span>这是一条测试推文，用来验证按钮注入与转图。<img alt="😀" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></span></div>
+    <div dir="auto" lang="zh"><span>这是引用/回复块的文本，应该被当作 quote。</span></div>
+    <div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/AAAAAAA?format=png&amp;name=small" alt="media"></div>
+    <div aria-label="12 次喜欢，3 次转帖" role="group"></div>
+    <a href="https://x.com/alice/status/1780000000000000000"><time datetime="2026-11-06T10:00:00Z">2小时</time></a>
+  </div>
+
+  <!-- cell2: 纯视频（twitter.com 链接） -->
+  <div data-testid="cellInnerDiv" id="cell2">
+    <div data-testid="Tweet-User-Avatar"><div data-avatar="1" style="width:48px;height:48px"></div></div>
+    <div data-testid="User-Name">
+      <a href="/bob">Bob B.</a>::
+      <a href="/bob">@bob</a>
+      <time datetime="2026-11-06T11:00:00Z">3小时</time>
+    </div>
+    <div data-testid="videoComponent"><div data-testid="videoPlayer"><video></video></div></div>
+    <a href="https://twitter.com/bob/status/1790000000000000000"><time datetime="2026-11-06T11:00:00Z">3小时</time></a>
+  </div>
+
+  <!-- cell3: 纯文字无图（x.com） -->
+  <div data-testid="cellInnerDiv" id="cell3">
+    <div data-testid="Tweet-User-Avatar"><div data-avatar="1" style="width:48px;height:48px"></div></div>
+    <div data-testid="User-Name">
+      <a href="/carol">Carol C.</a>::
+      <a href="/carol">@carol</a>
+      <time datetime="2026-11-06T12:00:00Z">4小时</time>
+    </div>
+    <div dir="auto" lang="en"><span>Just text, no media at all.</span></div>
+    <div aria-label="0 Likes" role="group"></div>
+    <a href="https://x.com/carol/status/1800000000000000000"><time datetime="2026-11-06T12:00:00Z">4小时</time></a>
+  </div>
+</div>
+
+<div id="shot"><!-- 生成的推文图会替换这里 --></div>
+<img id="resultImg" alt="result">
+
+<script src="../twdl-0.2.1-zh.user.js"></script>
+<script src="test.js"></script>
+</body>
+</html>

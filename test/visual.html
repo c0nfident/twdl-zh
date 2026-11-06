@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>twdl visual</title>
+<style>
+  body { margin: 0; padding: 10px; font: 14px/1.5 system-ui, sans-serif; background: #fff; color: #0f1419; }
+  .spacer { height: 6px; }
+  [data-testid="cellInnerDiv"] { border: 1px solid #e1e8ed; border-radius: 8px; padding: 10px; margin: 10px 0; max-width: 620px; }
+  [data-testid="User-Name"] a { text-decoration: none; color: #0f1419; font-weight: 600; }
+  [data-testid="tweetPhoto"] img { max-width: 300px; border-radius: 12px; display: block; margin-top: 6px; }
+  .caption { color: #536471; font-size: 12px; margin-bottom: 2px; }
+</style>
+<script>
+(function () {
+  function pixels(w, h, a, b, label) {
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var x = c.getContext('2d');
+    var g = x.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, a); g.addColorStop(1, b);
+    x.fillStyle = g; x.fillRect(0, 0, w, h);
+    x.fillStyle = '#fff'; x.font = 'bold 28px sans-serif'; x.fillText(label, 16, h / 2 + 10);
+    return c.toDataURL('image/png');
+  }
+  window.__TWDL_TEST_PIXELS = { media: pixels(600, 400, '#e0245e', '#1d9bf0', 'MEDIA'), avatar: pixels(120, 120, '#ffd166', '#06d6a0', 'AVA') };
+})();
+</script>
+</head>
+<body>
+<div class="caption">按钮组外观检查（真实 X 上没有这层灰底，这里只是假 DOM）：文字推文 / 带图推文 / 纯视频推文</div>
+
+<div data-testid="cellInnerDiv" id="cell1">
+  <div data-testid="Tweet-User-Avatar"><div data-avatar="1" style="width:48px;height:48px"></div></div>
+  <div data-testid="User-Name"><a href="/alice">Alice A.</a> <a href="/alice">@alice</a> <time datetime="2026-11-06T10:00:00Z">2小时</time></div>
+  <div dir="auto" lang="zh"><span>文字推文：按钮组应该挂在正文下面。</span></div>
+  <div aria-label="12 次喜欢" role="group"></div>
+  <a href="https://x.com/alice/status/1780000000000000000"><time datetime="2026-11-06T10:00:00Z">2小时</time></a>
+</div>
+
+<div data-testid="cellInnerDiv" id="cell2">
+  <div data-testid="Tweet-User-Avatar"><div data-avatar="1" style="width:48px;height:48px"></div></div>
+  <div data-testid="User-Name"><a href="/dave">Dave D.</a> <a href="/dave">@dave</a> <time datetime="2026-11-06T11:00:00Z">3小时</time></div>
+  <div dir="auto" lang="zh"><span>带图推文：图片 + 按钮组。</span></div>
+  <div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/AAAAAAA?format=png&amp;name=small" alt="media"></div>
+  <a href="https://x.com/dave/status/1790000000000000000"><time datetime="2026-11-06T11:00:00Z">3小时</time></a>
+</div>
+
+<div data-testid="cellInnerDiv" id="cell3">
+  <div data-testid="Tweet-User-Avatar"><div data-avatar="1" style="width:48px;height:48px"></div></div>
+  <div data-testid="User-Name"><a href="/bob">Bob B.</a> <a href="/bob">@bob</a> <time datetime="2026-11-06T11:00:00Z">3小时</time></div>
+  <div data-testid="videoComponent"><div data-testid="videoPlayer" style="width:300px;height:120px;background:#cfd9de;display:flex;align-items:center;justify-content:center;border-radius:12px">video</div></div>
+  <a href="https://twitter.com/bob/status/1790000000000000000"><time datetime="2026-11-06T11:00:00Z">3小时</time></a>
+</div>
+
+<script src="../twdl-0.2.1-zh.user.js"></script>
+<script src="visual.js"></script>
+</body>
+</html>
